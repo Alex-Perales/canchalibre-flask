@@ -1,0 +1,749 @@
+:root {
+    --sport: #22c55e;              /* se sobreescribe segun el deporte activo */
+    --header-1: #15803d;
+    --header-2: #22c55e;
+    --bg: #ffffff;
+    --bg-soft: #f1faf4;
+    --surface: #ffffff;
+    --surface-solid: #ffffff;
+    --surface-2: #eefaf2;
+    --line: rgba(22, 163, 74, 0.22);
+    --line-strong: color-mix(in srgb, var(--sport) 55%, transparent);
+    --ink: #10241a;
+    --white: #ffffff;
+    --muted: #5c6f66;
+    --muted-2: #8c9c94;
+    --green-400: #4ade80;
+    --green-300: #86efac;
+    --emerald: #10b981;
+    --lime: #84cc16;
+    --teal: #0d9488;
+    --danger: #e11d48;
+    --radius: 18px;
+    --shadow: 0 18px 40px -20px rgba(16, 36, 26, 0.18);
+    --glow: 0 0 50px -10px color-mix(in srgb, var(--sport) 35%, transparent);
+    --font-display: 'Barlow Semi Condensed', sans-serif;
+    --font-body: 'Barlow', system-ui, sans-serif;
+    --font-mono: 'Space Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    isolation: isolate;
+    overflow-x: hidden;
+}
+
+/* ---------- Fondo: grilla sutil sobre blanco ---------- */
+.bg-grid {
+    position: fixed;
+    inset: 0;
+    z-index: -3;
+    background-image:
+        linear-gradient(color-mix(in srgb, var(--sport) 10%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--sport) 10%, transparent) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(1200px 800px at 50% 0%, #000 0%, transparent 75%);
+    mask-image: radial-gradient(1200px 800px at 50% 0%, #000 0%, transparent 75%);
+    opacity: 0.6;
+    transition: background-image 0.5s ease;
+}
+.bg-glow {
+    position: fixed;
+    z-index: -2;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    transition: background 0.5s ease;
+}
+.bg-glow-1 {
+    width: 620px; height: 620px;
+    top: -220px; right: -160px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--sport) 16%, transparent), transparent 70%);
+}
+.bg-glow-2 {
+    width: 520px; height: 520px;
+    bottom: -200px; left: -160px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--teal) 12%, transparent), transparent 70%);
+}
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, transparent 0%, var(--bg) 92%);
+}
+
+/* ---------- Barra superior (siempre verde) ---------- */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px clamp(16px, 5vw, 48px);
+    background: linear-gradient(120deg, var(--header-1), var(--header-2));
+    box-shadow: 0 12px 30px -18px rgba(21, 128, 61, 0.65);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+.topbar-right { display: flex; align-items: center; gap: 20px; }
+
+.brand { display: flex; align-items: center; gap: 14px; text-decoration: none; color: inherit; }
+
+.brand-mark {
+    display: grid;
+    place-items: center;
+    width: 46px; height: 46px;
+    border-radius: 13px;
+    background: #ffffff;
+    color: var(--header-1);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 8px 22px -8px rgba(0,0,0,0.35);
+    transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+
+.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+.brand-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: 0.3px;
+    color: #ffffff;
+}
+.brand-tag { color: rgba(255, 255, 255, 0.85); font-size: 0.85rem; }
+
+.brand-loc {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+}
+
+.btn-nav {
+    text-decoration: none;
+    color: #ffffff;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.92rem;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.12);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+.btn-nav:hover {
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.24);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+/* ---------- Toasts ---------- */
+.toasts {
+    position: fixed;
+    top: 88px;
+    right: clamp(16px, 5vw, 48px);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 360px;
+}
+.toast {
+    padding: 13px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    box-shadow: var(--shadow);
+    border: 1px solid transparent;
+    backdrop-filter: blur(10px);
+    animation: slideIn 0.3s ease;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.toast.fade { opacity: 0; transform: translateX(20px); }
+.toast-success { background: #ecfdf3; color: #067647; border-color: rgba(16, 185, 129, 0.4); }
+.toast-error   { background: #fef2f2; color: #b91c3c; border-color: rgba(225, 29, 72, 0.35); }
+@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+/* ---------- Layout ---------- */
+.wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: clamp(24px, 4vw, 44px) clamp(16px, 5vw, 48px) 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+.section {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 36px) clamp(16px, 5vw, 48px);
+}
+
+.eyebrow {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--sport);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.4s ease;
+}
+.eyebrow.center { justify-content: center; }
+.step-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    letter-spacing: 0.2px;
+    margin-bottom: 18px;
+    color: var(--ink);
+}
+.step-title.center { text-align: center; }
+.step-title .sub { color: var(--muted); font-weight: 600; font-size: 0.95rem; }
+
+/* ---------- Selector de deporte (pantalla de reservas) ---------- */
+.sports {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+}
+.sport-card {
+    --c: #22c55e;
+    text-decoration: none;
+    color: var(--ink);
+    background: linear-gradient(160deg, var(--surface), rgba(255,255,255,0.015));
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+.sport-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--c);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+.sport-card:hover { transform: translateY(-3px); border-color: var(--c); }
+.sport-card.active {
+    border-color: var(--c);
+    background: color-mix(in srgb, var(--c) 18%, var(--surface));
+    box-shadow: 0 10px 30px -14px var(--c), inset 0 0 0 1px color-mix(in srgb, var(--c) 40%, transparent);
+}
+.sport-card.active::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--c), transparent);
+}
+.sport-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    position: relative;
+}
+
+/* tarjeta con foto real de la cancha */
+.sport-card.has-photo {
+    justify-content: flex-end;
+    min-height: 150px;
+    padding: 0 12px 14px;
+}
+.sport-card.has-photo::before {
+    opacity: 1;
+    background:
+        linear-gradient(180deg, rgba(6, 20, 12, 0.08) 0%, rgba(6, 20, 12, 0.32) 55%, rgba(6, 20, 12, 0.86) 100%),
+        var(--photo) center / cover no-repeat;
+}
+.sport-card.has-photo .sport-name { color: #ffffff; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+
+/* ---------- Banner de la cancha elegida (paso 3) ---------- */
+.cancha-banner {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: 150px;
+    margin-bottom: 18px;
+    padding: 18px 22px;
+    border-radius: var(--radius);
+    border: 1.5px solid color-mix(in srgb, var(--c) 45%, transparent);
+    box-shadow: 0 16px 40px -20px color-mix(in srgb, var(--c) 60%, transparent);
+    background:
+        linear-gradient(180deg, rgba(6, 20, 12, 0.05) 0%, rgba(6, 20, 12, 0.35) 55%, rgba(6, 20, 12, 0.88) 100%),
+        var(--photo) center / cover no-repeat;
+}
+.cancha-banner-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+}
+
+/* ---------- Controles fecha/nombre ---------- */
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; }
+.control { display: flex; flex-direction: column; gap: 8px; }
+.control label {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+.control input {
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    backdrop-filter: blur(10px);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.control input::placeholder { color: var(--muted-2); }
+.control input:focus {
+    outline: none;
+    border-color: var(--sport);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--sport) 22%, transparent);
+}
+.control input.shake { animation: shake 0.4s; border-color: var(--danger); }
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-7px); }
+    75% { transform: translateX(7px); }
+}
+input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; }
+
+/* ---------- Grilla de horarios ---------- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+.slot-form { display: contents; }
+.slot {
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+    min-height: 104px;
+    border: 1.5px solid var(--line);
+}
+.slot-hora {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.4rem;
+    line-height: 1;
+}
+.slot-state {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    font-weight: 700;
+}
+
+/* libre = boton */
+button.free {
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+    align-items: flex-start;
+    backdrop-filter: blur(10px);
+    transition: transform 0.14s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+button.free .slot-state { color: var(--sport); }
+button.free .slot-cta {
+    margin-top: auto;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--sport);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+button.free:hover {
+    transform: translateY(-3px);
+    border-color: var(--sport);
+    background: color-mix(in srgb, var(--sport) 14%, var(--surface));
+    box-shadow: 0 12px 26px -16px var(--sport);
+}
+button.free:hover .slot-cta { opacity: 1; transform: translateX(0); }
+button.free:focus-visible {
+    outline: none;
+    border-color: var(--sport);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--sport) 25%, transparent);
+}
+
+/* ocupado */
+.slot.taken {
+    background: repeating-linear-gradient(
+        135deg,
+        var(--bg-soft),
+        var(--bg-soft) 10px,
+        var(--surface-solid) 10px,
+        var(--surface-solid) 20px
+    );
+    opacity: 0.85;
+}
+.slot.taken .slot-hora { color: var(--muted); }
+.slot.taken .slot-state { color: var(--muted-2); }
+.slot.taken .slot-name {
+    margin-top: auto;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---------- Agenda ---------- */
+.agenda { display: flex; flex-direction: column; gap: 8px; }
+.agenda-row {
+    display: grid;
+    grid-template-columns: 70px 1fr 1fr auto;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-left: 4px solid var(--c);
+    border-radius: 12px;
+    padding: 13px 16px;
+    backdrop-filter: blur(10px);
+}
+.agenda-hora {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.2rem;
+}
+.agenda-cancha { color: var(--ink); font-weight: 600; }
+.agenda-nombre { color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
+.agenda-extra { font-size: 0.8rem; color: var(--muted-2); font-family: var(--font-mono); }
+.btn-cancel {
+    background: transparent;
+    color: var(--danger);
+    border: 1.5px solid color-mix(in srgb, var(--danger) 50%, transparent);
+    border-radius: 9px;
+    padding: 8px 14px;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+.btn-cancel:hover { background: var(--danger); color: #ffffff; border-color: var(--danger); }
+
+/* ---------- Modal de confirmacion ---------- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(6, 18, 12, 0.55);
+    backdrop-filter: blur(6px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+.modal-overlay.open { opacity: 1; visibility: visible; }
+.modal-box {
+    width: 100%;
+    max-width: 400px;
+    background: var(--surface-solid);
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius);
+    box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.5);
+    padding: 26px 24px;
+    transform: translateY(14px) scale(0.98);
+    transition: transform 0.2s ease;
+}
+.modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+.modal-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--ink);
+    margin-bottom: 10px;
+}
+.modal-message {
+    color: var(--muted);
+    font-size: 0.98rem;
+    line-height: 1.55;
+    margin-bottom: 24px;
+}
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.btn-modal-cancel {
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+.btn-modal-cancel:hover { border-color: var(--muted-2); color: var(--ink); }
+.btn-modal-confirm {
+    background: linear-gradient(120deg, var(--green-400), var(--sport) 55%, var(--emerald));
+    color: #04160c;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 20px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 10px 26px -12px color-mix(in srgb, var(--sport) 70%, transparent);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-modal-confirm:hover { transform: translateY(-2px); }
+.btn-modal-confirm.danger {
+    background: linear-gradient(120deg, #f87171, var(--danger) 65%);
+    color: #ffffff;
+    box-shadow: 0 10px 26px -12px rgba(225, 29, 72, 0.55);
+}
+
+/* ---------- Vacio ---------- */
+.empty {
+    text-align: center;
+    padding: 44px 20px;
+    background: var(--surface);
+    border: 1.5px dashed var(--line);
+    border-radius: var(--radius);
+    color: var(--muted);
+    backdrop-filter: blur(10px);
+}
+.empty-emoji { font-size: 2.4rem; display: block; margin-bottom: 10px; }
+
+/* ================================================================
+   Pantalla 1 — Portada (landing)
+   ================================================================ */
+.hero {
+    position: relative;
+    isolation: isolate;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: clamp(64px, 14vw, 130px) clamp(16px, 5vw, 48px) clamp(56px, 10vw, 96px);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+}
+.hero::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 100vw;
+    transform: translateX(-50%);
+    z-index: -1;
+    background:
+        linear-gradient(180deg, rgba(4, 14, 10, 0.45) 0%, rgba(4, 14, 10, 0.25) 40%, rgba(4, 14, 10, 0.8) 100%),
+        url('img/FondoPrincipal.png') center / cover no-repeat;
+}
+.hero-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    line-height: 1.08;
+    letter-spacing: 0.2px;
+    color: #bef264;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65), 0 6px 22px rgba(0, 0, 0, 0.5);
+}
+.grad-text {
+    color: #4ade80;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65), 0 6px 22px rgba(0, 0, 0, 0.5);
+}
+.hero-sub {
+    max-width: 620px;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    line-height: 1.6;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+.hero-cta {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+}
+.btn-primary {
+    text-decoration: none;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: #04160c;
+    padding: 16px 36px;
+    border-radius: 999px;
+    background: linear-gradient(120deg, var(--green-400), var(--sport) 55%, var(--emerald));
+    box-shadow: 0 16px 40px -14px color-mix(in srgb, var(--sport) 80%, transparent), inset 0 0 0 1px rgba(255,255,255,0.35);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 22px 50px -14px color-mix(in srgb, var(--sport) 90%, transparent), inset 0 0 0 1px rgba(255,255,255,0.45);
+}
+/* ---------- Vitrina de deportes (landing) ---------- */
+.sports-showcase {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+}
+.sport-tile {
+    --c: #22c55e;
+    position: relative;
+    text-decoration: none;
+    color: var(--ink);
+    background: linear-gradient(165deg, var(--surface), rgba(255,255,255,0.01));
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius);
+    padding: 28px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.sport-tile::before {
+    content: "";
+    position: absolute;
+    inset: -40% -40% auto auto;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, var(--c), transparent 70%);
+    opacity: 0.35;
+    filter: blur(10px);
+    transition: opacity 0.2s ease;
+}
+.sport-tile:hover {
+    transform: translateY(-5px);
+    border-color: var(--c);
+    box-shadow: 0 18px 40px -18px var(--c);
+}
+.sport-tile:hover::before { opacity: 0.55; }
+.tile-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.2rem;
+    position: relative;
+}
+.tile-cta {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--c);
+    opacity: 0;
+    transform: translateY(-2px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    position: relative;
+}
+.sport-tile:hover .tile-cta { opacity: 1; transform: translateY(0); }
+
+/* tarjeta con foto real de la cancha (landing) */
+.sport-tile.has-photo {
+    justify-content: flex-end;
+    min-height: 190px;
+    padding: 0 14px 16px;
+}
+.sport-tile.has-photo::before {
+    inset: 0;
+    width: auto;
+    height: auto;
+    filter: none;
+    opacity: 1;
+    background:
+        linear-gradient(180deg, rgba(6, 20, 12, 0.05) 0%, rgba(6, 20, 12, 0.22) 45%, rgba(6, 20, 12, 0.88) 100%),
+        var(--photo) center / cover no-repeat;
+}
+.sport-tile.has-photo:hover::before { opacity: 1; }
+.sport-tile.has-photo .tile-name { color: #ffffff; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+.sport-tile.has-photo .tile-cta { color: #ffffff; }
+
+/* ---------- Footer ---------- */
+.foot {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 0.88rem;
+    padding: 34px 20px;
+    margin-top: 12px;
+    background: linear-gradient(120deg, var(--header-1), var(--header-2));
+    box-shadow: 0 -12px 30px -22px rgba(21, 128, 61, 0.65);
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+.foot-brand {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: 0.3px;
+    color: #ffffff;
+}
+.foot-sports { color: rgba(255, 255, 255, 0.78); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+    .sports-showcase { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 720px) {
+    .topbar { flex-direction: row; align-items: center; }
+    .brand-tag { display: none; }
+    .sports { grid-template-columns: repeat(3, 1fr); }
+    .controls { grid-template-columns: 1fr; }
+    .agenda-row { grid-template-columns: 56px 1fr auto; }
+    .agenda-nombre { grid-column: 2 / 3; font-size: 0.85rem; }
+}
+@media (max-width: 420px) {
+    .sports { grid-template-columns: repeat(2, 1fr); }
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .sports-showcase { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+}

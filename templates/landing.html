@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CanchaLibre Reserva tu cancha</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="landing" style="--sport: #22c55e;">
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <header class="topbar">
+        <a class="brand" href="{{ url_for('landing') }}">
+            <span class="brand-mark">CL</span>
+            <div class="brand-text">
+                <span class="brand-name">CanchaLibre</span>
+                <span class="brand-tag">Reserva en segundos, sin llamadas</span>
+            </div>
+        </a>
+        <div class="topbar-right">
+            <span class="brand-loc">📍 Lima, Perú</span>
+            <a class="btn-nav" href="{{ url_for('reservas_view') }}">Ir a reservar →</a>
+        </div>
+    </header>
+
+    <main class="hero">
+        <h1 class="hero-title">
+            Tu cancha, <span class="grad-text">reservada en segundos</span>
+        </h1>
+        <p class="hero-sub">
+            Fútbol, vóley, básquet, tenis y natación en un solo lugar.
+            Elige un horario libre y queda confirmado al instante sin llamadas, sin filas.
+        </p>
+
+        <div class="hero-cta">
+            <a class="btn-primary" href="{{ url_for('reservas_view') }}">Reservar ahora →</a>
+        </div>
+    </main>
+
+    <section class="section">
+        <p class="eyebrow center">Deportes disponibles</p>
+        <h2 class="step-title center">Elige dónde jugar</h2>
+        <div class="sports-showcase">
+            {% for c in canchas %}
+                <a class="sport-tile {% if c['imagen'] %}has-photo{% endif %}"
+                   style="--c: {{ c['color'] }};{% if c['imagen'] %} --photo: url('{{ url_for('static', filename='img/' ~ c['imagen']) }}');{% endif %}"
+                   href="{{ url_for('reservas_view', cancha=c['id']) }}">
+                    <span class="tile-name">{{ c['deporte']|capitalize }}</span>
+                    <span class="tile-cta">Ver horarios →</span>
+                </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <footer class="foot">
+        <span class="foot-brand">CanchaLibre · Lima, Perú</span>
+        <span class="foot-sports">Fútbol · Vóley · Básquet · Tenis · Natación</span>
+    </footer>
+</body>
+</html>

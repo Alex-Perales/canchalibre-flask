@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CanchaLibre — Reservar cancha</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body style="--sport: {{ cancha_activa['color'] if cancha_activa else '#22c55e' }};">
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <!-- Barra superior -->
+    <header class="topbar">
+        <a class="brand" href="{{ url_for('landing') }}">
+            <span class="brand-mark">CL</span>
+            <div class="brand-text">
+                <span class="brand-name">CanchaLibre</span>
+                <span class="brand-tag">Reserva en segundos, sin llamadas</span>
+            </div>
+        </a>
+        <div class="topbar-right">
+            <span class="brand-loc">📍 Lima, Perú</span>
+            <a class="btn-nav" href="{{ url_for('landing') }}">← Inicio</a>
+        </div>
+    </header>
+
+    <!-- Mensajes -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="toasts">
+                {% for category, message in messages %}
+                    <div class="toast toast-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main class="wrap">
+
+        <!-- Paso 1: elegir deporte -->
+        <section class="step">
+            <p class="eyebrow">Paso 1</p>
+            <h2 class="step-title">Elige tu deporte</h2>
+            <div class="sports">
+                {% for c in canchas %}
+                    <a class="sport-card {% if c['id'] == cancha_sel %}active{% endif %} {% if c['imagen'] %}has-photo{% endif %}"
+                       style="--c: {{ c['color'] }};{% if c['imagen'] %} --photo: url('{{ url_for('static', filename='img/' ~ c['imagen']) }}');{% endif %}"
+                       href="{{ url_for('reservas_view', cancha=c['id'], fecha=fecha_sel) }}">
+                        <span class="sport-name">{{ c['deporte']|capitalize }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Paso 2: fecha y nombre -->
+        <section class="step">
+            <p class="eyebrow">Paso 2</p>
+            <h2 class="step-title">¿Cuándo y quién?</h2>
+            <div class="controls">
+                <form method="get" action="{{ url_for('reservas_view') }}" class="control">
+                    <label for="fecha">Fecha</label>
+                    <input type="hidden" name="cancha" value="{{ cancha_sel }}">
+                    <input type="date" id="fecha" name="fecha" value="{{ fecha_sel }}"
+                           min="{{ hoy }}" max="{{ max_fecha }}" onchange="this.form.submit()">
+                </form>
+                <div class="control">
+                    <label for="nombre">Tu nombre</label>
+                    <input type="text" id="nombre" placeholder="Ej. Carlos Ramírez"
+                           autocomplete="name">
+                </div>
+                <div class="control">
+                    <label for="telefono">Tu teléfono</label>
+                    <input type="tel" id="telefono" placeholder="Ej. 987 654 321"
+                           autocomplete="tel">
+                </div>
+                <div class="control">
+                    <label for="personas">Cantidad de personas</label>
+                    <input type="number" id="personas" min="1" max="50" placeholder="Ej. 10">
+                </div>
+            </div>
+        </section>
+
+        <!-- Paso 3: elegir horario -->
+        <section class="step">
+            <p class="eyebrow">Paso 3</p>
+
+            {% if cancha_activa and cancha_activa['imagen'] %}
+                <div class="cancha-banner"
+                     style="--c: {{ cancha_activa['color'] }}; --photo: url('{{ url_for('static', filename='img/' ~ cancha_activa['imagen']) }}');">
+                    <span class="cancha-banner-name">{{ cancha_activa['nombre'] }}</span>
+                </div>
+            {% endif %}
+
+            <h2 class="step-title">
+                Toca un horario libre para reservar
+                <span class="sub">— {{ cancha_activa['nombre'] if cancha_activa else '' }}, {{ fecha_sel }}</span>
+            </h2>
+
+            <div class="grid">
+                {% for hora in horarios %}
+                    {% if hora in ocupadas %}
+                        <div class="slot taken" title="Reservado por {{ ocupadas[hora] }}">
+                            <span class="slot-hora">{{ hora }}</span>
+                            <span class="slot-state">Ocupado</span>
+                            <span class="slot-name">{{ ocupadas[hora] }}</span>
+                        </div>
+                    {% else %}
+                        <form method="post" action="{{ url_for('reservar') }}" class="slot-form">
+                            <input type="hidden" name="cancha_id" value="{{ cancha_sel }}">
+                            <input type="hidden" name="fecha" value="{{ fecha_sel }}">
+                            <input type="hidden" name="hora" value="{{ hora }}">
+                            <input type="hidden" name="nombre" class="nombre-hidden" value="">
+                            <input type="hidden" name="telefono" class="telefono-hidden" value="">
+                            <input type="hidden" name="personas" class="personas-hidden" value="">
+                            <button type="submit" class="slot free">
+                                <span class="slot-hora">{{ hora }}</span>
+                                <span class="slot-state">Libre</span>
+                                <span class="slot-cta">Reservar →</span>
+                            </button>
+                        </form>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Reservas del día -->
+        <section class="step">
+            <p class="eyebrow">Agenda</p>
+            <h2 class="step-title">Reservas del {{ fecha_sel }}</h2>
+            {% if reservas %}
+                <div class="agenda">
+                    {% for r in reservas %}
+                        <div class="agenda-row" style="--c: {{ r['color'] }};">
+                            <span class="agenda-hora">{{ r['hora'] }}</span>
+                            <span class="agenda-cancha">{{ r['cancha'] }}</span>
+                            <span class="agenda-nombre">
+                                {{ r['nombre'] }}
+                                <span class="agenda-extra">{{ r['telefono'] }}{% if r['personas'] %} · {{ r['personas'] }} personas{% endif %}</span>
+                            </span>
+                            <form method="post" action="{{ url_for('cancelar', reserva_id=r['id']) }}"
+                                  class="cancel-form" data-nombre="{{ r['nombre'] }}" data-hora="{{ r['hora'] }}">
+                                <input type="hidden" name="fecha" value="{{ fecha_sel }}">
+                                <input type="hidden" name="cancha" value="{{ cancha_sel }}">
+                                <button type="submit" class="btn-cancel">Cancelar</button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty">
+                    <span class="empty-emoji">🗓️</span>
+                    <p>Aún no hay reservas para este día. ¡Toma el primer horario!</p>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <footer class="foot">
+        <span class="foot-brand">CanchaLibre · Lima, Perú</span>
+        <span class="foot-sports">Fútbol · Vóley · Básquet · Tenis · Natación</span>
+    </footer>
+
+    <!-- Modal de confirmacion -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-box">
+            <h3 class="modal-title" id="modalTitle">Confirmar</h3>
+            <p class="modal-message" id="modalMessage"></p>
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" id="modalCancelBtn">Volver</button>
+                <button type="button" class="btn-modal-confirm" id="modalConfirmBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Copia el nombre y telefono al formulario del horario tocado antes de enviar.
+        const nombreInput = document.getElementById('nombre');
+        const telefonoInput = document.getElementById('telefono');
+        const personasInput = document.getElementById('personas');
+        const KEY_NOMBRE = 'canchalibre_nombre';
+        const KEY_TELEFONO = 'canchalibre_telefono';
+        // Recuerda el nombre y telefono mientras dure la sesión de la pestaña.
+        if (sessionStorage.getItem(KEY_NOMBRE)) nombreInput.value = sessionStorage.getItem(KEY_NOMBRE);
+        if (sessionStorage.getItem(KEY_TELEFONO)) telefonoInput.value = sessionStorage.getItem(KEY_TELEFONO);
+        nombreInput.addEventListener('input', () => sessionStorage.setItem(KEY_NOMBRE, nombreInput.value));
+        telefonoInput.addEventListener('input', () => sessionStorage.setItem(KEY_TELEFONO, telefonoInput.value));
+
+        const canchaNombre = {{ (cancha_activa['nombre'] if cancha_activa else '')|tojson }};
+        const fechaSel = {{ fecha_sel|tojson }};
+
+        // Modal de confirmacion (reemplaza al confirm() nativo del navegador).
+        const modal = document.getElementById('confirmModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+        let pendingAction = null;
+
+        function openModal({ title, message, danger, confirmLabel, onConfirm }) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalConfirmBtn.textContent = confirmLabel;
+            modalConfirmBtn.classList.toggle('danger', !!danger);
+            pendingAction = onConfirm;
+            modal.classList.add('open');
+        }
+        function closeModal() {
+            modal.classList.remove('open');
+            pendingAction = null;
+        }
+        modalCancelBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+        modalConfirmBtn.addEventListener('click', () => {
+            const accion = pendingAction;
+            closeModal();
+            if (accion) accion();
+        });
+
+        document.querySelectorAll('.slot-form').forEach(form => {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const nombre = (nombreInput.value || '').trim();
+                const telefono = (telefonoInput.value || '').trim();
+                const personas = (personasInput.value || '').trim();
+
+                if (!nombre) {
+                    nombreInput.classList.add('shake');
+                    nombreInput.focus();
+                    nombreInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => nombreInput.classList.remove('shake'), 500);
+                    return;
+                }
+                if (!telefono) {
+                    telefonoInput.classList.add('shake');
+                    telefonoInput.focus();
+                    telefonoInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => telefonoInput.classList.remove('shake'), 500);
+                    return;
+                }
+
+                const hora = form.querySelector('input[name="hora"]').value;
+                const detallePersonas = personas ? ` para ${personas} personas` : '';
+                openModal({
+                    title: 'Confirmar reserva',
+                    message: `${canchaNombre} · ${fechaSel} · ${hora}${detallePersonas}`,
+                    danger: false,
+                    confirmLabel: 'Reservar',
+                    onConfirm: () => {
+                        form.querySelector('.nombre-hidden').value = nombre;
+                        form.querySelector('.telefono-hidden').value = telefono;
+                        form.querySelector('.personas-hidden').value = personas;
+                        form.submit();
+                    },
+                });
+            });
+        });
+
+        document.querySelectorAll('.cancel-form').forEach(form => {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                openModal({
+                    title: 'Cancelar reserva',
+                    message: `¿Cancelar la reserva de ${form.dataset.nombre} a las ${form.dataset.hora}?`,
+                    danger: true,
+                    confirmLabel: 'Sí, cancelar',
+                    onConfirm: () => form.submit(),
+                });
+            });
+        });
+
+        // Desvanece los mensajes después de unos segundos.
+        setTimeout(() => {
+            document.querySelectorAll('.toast').forEach(t => t.classList.add('fade'));
+        }, 3500);
+    </script>
+</body>
+</html>
