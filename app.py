@@ -101,7 +101,7 @@ def init_db():
         db.execute("ALTER TABLE reservas ADD COLUMN personas INTEGER")
     if db.execute("SELECT COUNT(*) FROM canchas").fetchone()[0] == 0:
         db.executemany(
-            "INSERT INTO canchas (nombre, deporte, emoji, color) VALUES (?, ?, ?, ?)",
+            "INSERT INTO canchas (nombre, deporte, emoji, color, imagen) VALUES (?, ?, ?, ?, ?)",
             CANCHAS,
         )
     db.commit()
